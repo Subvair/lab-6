@@ -1,5 +1,6 @@
 using System;
 
-public class MatrixException : Exception {
+public class MatrixException : Exception 
+{
   public MatrixException(string message) : base(message) { }
 }

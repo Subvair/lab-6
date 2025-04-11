@@ -1,5 +1,7 @@
-﻿class Program {
-  static void Main() {
+﻿class Program 
+{
+  static void Main() 
+  {
     Console.Write("Введите размер матрицы: ");
     int size = int.Parse(Console.ReadLine());
 
@@ -26,5 +28,5 @@
     handler.SetNext(new DiagonalHandler());
 
     handler.Handle(m1);
-    }
+  }
 }
