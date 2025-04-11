@@ -1,11 +1,11 @@
 using System;
 
-public class SquareMatrix : ICloneable, IComparable<SquareMatrix> 
+public class SquareMatrix : ICloneable, IComparable<SquareMatrix>
 {
   private double[,] _data;
   public int Size { get; }
 
-  public SquareMatrix(int size, bool randomize = false) 
+  public SquareMatrix(int size, bool randomize = false)
   {
     if (size <= 0) throw new MatrixException("Размер матрицы должен быть положительным");
 
@@ -15,110 +15,111 @@ public class SquareMatrix : ICloneable, IComparable<SquareMatrix>
     if (randomize) FillRandom();
   }
 
-  private void FillRandom() 
+  private void FillRandom()
   {
-    Random rand = new Random();
-    
-    for (int i = 0; i < Size; i++)
-      for (int j = 0; j < Size; j++)
-        _data[i, j] = rand.NextDouble() * 10;
+    Random random = new Random();
+
+    for (int row = 0; row < Size; row++)
+      for (int column = 0; column < Size; column++)
+        _data[row, column] = random.NextDouble() * 10;
   }
 
-  public static SquareMatrix operator +(SquareMatrix a, SquareMatrix b) 
+  public static SquareMatrix operator +(SquareMatrix firstMatrix, SquareMatrix secondMatrix)
   {
-    if (a.Size != b.Size) throw new MatrixException("Матрицы должны быть одного размера");
+    if (firstMatrix.Size != secondMatrix.Size) throw new MatrixException("Матрицы должны быть одного размера");
 
-    SquareMatrix result = new SquareMatrix(a.Size);
+    SquareMatrix resultMatrix = new SquareMatrix(firstMatrix.Size);
 
-    for (int i = 0; i < a.Size; i++)
-      for (int j = 0; j < a.Size; j++)
-        result._data[i, j] = a._data[i, j] + b._data[i, j];
+    for (int row = 0; row < firstMatrix.Size; row++)
+      for (int column = 0; column < firstMatrix.Size; column++)
+        resultMatrix._data[row, column] = firstMatrix._data[row, column] + secondMatrix._data[row, column];
 
-    return result;
+    return resultMatrix;
   }
 
-  public static SquareMatrix operator *(SquareMatrix a, SquareMatrix b) 
+  public static SquareMatrix operator *(SquareMatrix firstMatrix, SquareMatrix secondMatrix)
   {
-    if (a.Size != b.Size) throw new MatrixException("Матрицы должны быть одного размера");
+    if (firstMatrix.Size != secondMatrix.Size) throw new MatrixException("Матрицы должны быть одного размера");
 
-    SquareMatrix result = new SquareMatrix(a.Size);
+    SquareMatrix resultMatrix = new SquareMatrix(firstMatrix.Size);
 
-    for (int i = 0; i < a.Size; i++)
-      for (int j = 0; j < a.Size; j++)
-        for (int k = 0; k < a.Size; k++)
-          result._data[i, j] += a._data[i, k] * b._data[k, j];
+    for (int row = 0; row < firstMatrix.Size; row++)
+      for (int column = 0; column < firstMatrix.Size; column++)
+        for (int inner = 0; inner < firstMatrix.Size; inner++)
+          resultMatrix._data[row, column] += firstMatrix._data[row, inner] * secondMatrix._data[inner, column];
 
-    return result;
+    return resultMatrix;
   }
 
-  public double Determinant() 
+  public double Determinant()
   {
     if (Size == 1) return _data[0, 0];
 
     if (Size == 2) return _data[0, 0] * _data[1, 1] - _data[0, 1] * _data[1, 0];
 
-    double det = 0;
+    double determinant = 0;
 
-    for (int j = 0; j < Size; j++) 
+    for (int column = 0; column < Size; column++)
     {
-      det += (j % 2 == 0 ? 1 : -1) * _data[0, j] * Minor(0, j).Determinant();
+      determinant += (column % 2 == 0 ? 1 : -1) * _data[0, column] * Minor(0, column).Determinant();
     }
 
-    return det;
+    return determinant;
   }
 
-  private SquareMatrix Minor(int row, int col) 
+  private SquareMatrix Minor(int excludedRow, int excludedColumn)
   {
-    SquareMatrix minor = new SquareMatrix(Size - 1);
+    SquareMatrix minorMatrix = new SquareMatrix(Size - 1);
 
-    for (int i = 0, mi = 0; i < Size; i++) 
+    for (int originalRow = 0, minorRow = 0; originalRow < Size; originalRow++)
     {
-      if (i == row) continue;
+      if (originalRow == excludedRow) continue;
 
-      for (int j = 0, mj = 0; j < Size; j++) 
+      for (int originalColumn = 0, minorColumn = 0; originalColumn < Size; originalColumn++)
       {
-        if (j == col) continue;
-        
-        minor._data[mi, mj] = _data[i, j];
-        ++mj;
+        if (originalColumn == excludedColumn) continue;
+
+        minorMatrix._data[minorRow, minorColumn] = _data[originalRow, originalColumn];
+        minorColumn++;
       }
-      ++mi;
+
+      minorRow++;
     }
 
-    return minor;
+    return minorMatrix;
   }
 
-  public static bool operator >(SquareMatrix a, SquareMatrix b) => a.Determinant() > b.Determinant();
-  public static bool operator <(SquareMatrix a, SquareMatrix b) => a.Determinant() < b.Determinant();
-  public static bool operator >=(SquareMatrix a, SquareMatrix b) => a.Determinant() >= b.Determinant();
-  public static bool operator <=(SquareMatrix a, SquareMatrix b) => a.Determinant() <= b.Determinant();
-  public static bool operator ==(SquareMatrix a, SquareMatrix b) => a.Equals(b);
-  public static bool operator !=(SquareMatrix a, SquareMatrix b) => !a.Equals(b);
+  public static bool operator >(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => leftMatrix.Determinant() > rightMatrix.Determinant();
+  public static bool operator <(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => leftMatrix.Determinant() < rightMatrix.Determinant();
+  public static bool operator >=(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => leftMatrix.Determinant() >= rightMatrix.Determinant();
+  public static bool operator <=(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => leftMatrix.Determinant() <= rightMatrix.Determinant();
+  public static bool operator ==(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => leftMatrix.Equals(rightMatrix);
+  public static bool operator !=(SquareMatrix leftMatrix, SquareMatrix rightMatrix) => !leftMatrix.Equals(rightMatrix);
 
-  public static explicit operator double(SquareMatrix m) => m.Determinant();
+  public static explicit operator double(SquareMatrix matrix) => matrix.Determinant();
 
-  public override bool Equals(object obj) 
+  public override bool Equals(object obj)
   {
-    if (obj is not SquareMatrix other || Size != other.Size) return false;
+    if (obj is not SquareMatrix otherMatrix || Size != otherMatrix.Size) return false;
 
-    for (int i = 0; i < Size; i++)
-      for (int j = 0; j < Size; j++)
-        if (_data[i, j] != other._data[i, j]) return false;
+    for (int row = 0; row < Size; row++)
+      for (int column = 0; column < Size; column++)
+        if (_data[row, column] != otherMatrix._data[row, column]) return false;
 
     return true;
   }
 
   public override int GetHashCode() => _data.GetHashCode();
 
-  public override string ToString() 
+  public override string ToString()
   {
     string result = "";
 
-    for (int i = 0; i < Size; i++) 
+    for (int row = 0; row < Size; row++)
     {
-      for (int j = 0; j < Size; j++) 
+      for (int column = 0; column < Size; column++)
       {
-        result += _data[i, j].ToString("F2") + " ";
+        result += _data[row, column].ToString("F2") + " ";
       }
 
       result += "\n";
@@ -127,7 +128,7 @@ public class SquareMatrix : ICloneable, IComparable<SquareMatrix>
     return result;
   }
 
-  public int CompareTo(SquareMatrix other) => Determinant().CompareTo(other.Determinant());
+  public int CompareTo(SquareMatrix otherMatrix) => Determinant().CompareTo(otherMatrix.Determinant());
   public object Clone() => new SquareMatrix(Size) { _data = (double[,])_data.Clone() };
   public double[,] Data => _data;
 }
